@@ -31,6 +31,10 @@
             <el-option label="干式铺设" value="dry"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="是否跨层:">
+          <el-radio v-model="calcuForm.crossLayer" label="1">是</el-radio>
+          <el-radio v-model="calcuForm.crossLayer" label="2">否</el-radio>
+        </el-form-item>
         <div v-if="chooseShow">
           <template v-for="(category, index) in filteredCategories" >
             <el-form-item 
@@ -98,6 +102,7 @@ export default {
           region: '',
           area: '',
           method: '',
+          crossLayer: '2'
         },
         rules: {
           region: [
@@ -109,6 +114,9 @@ export default {
           ],
           method: [
             { required: true, message: '请选择铺设方式', trigger: 'change' }
+          ],
+          crossLayer: [
+            { required: true, message: '请确认是否跨层', trigger: 'change' }
           ]
         },
         //选项显示
@@ -448,6 +456,18 @@ export default {
             terminalAllPrice: regionData.constructionFee,
             unit: '元' 
           });
+        }
+        //添加跨层费用
+        if(this.calcuForm.crossLayer == '2'){
+          this.summaryData.push({
+            id: 'kc',
+            productName: '跨层费',
+            settlementPrice: 2.00,
+            settlementAllPrice: 2.00,
+            terminalPrice: 2.00,
+            terminalAllPrice: 2.00,
+            unit: '元/m²' 
+          })
         }
         console.log(this.summaryData)
         this.summaryColumns = this.defaultColumns
