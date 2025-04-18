@@ -3,7 +3,7 @@
     <img src="../assets/logo.jpg" class="logo" @click="handleAdminView" alt="">
     <h1>地暖计算器</h1>
     <div>
-      <el-form :model="calcuForm" :rules="rules" ref="calcuForm" label-width="150px" :label-position="'right'" class="calcu-form">
+      <el-form :model="calcuForm" :rules="rules" ref="calcuForm" :label-position="'right'" class="calcu-form">
         <el-form-item label="所在地区:">
           <el-select v-model="calcuForm.region" placeholder="请选择施工地区" class="form-item" @change="changeMethod">
             <el-option
@@ -13,7 +13,7 @@
               :value="region.id"
             >
             <span>{{ region.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 13px">
+            <span class="select-option-right">
               <span v-if="region.fillFee > 0 || region.constructionFee > 0">
                 回填远程费: {{ region.fillFee }}元 / 施工远程费: {{ region.constructionFee }}元
               </span>
@@ -55,7 +55,7 @@
                   :value="item.id"
                 >
                   <span>{{ item.productName }}</span>
-                  <span style="float: right; color: #8492a6; font-size: 13px">
+                  <span class="select-option-right">
                     {{ item.terminalPrice }} 元/m²
                   </span>
                 </el-option>
@@ -442,23 +442,23 @@ export default {
           this.summaryData.push({
             id: regionData.id,
             productName: '回填远程费',
-            settlementPrice: regionData.fillFee,
+            settlementPrice: '-',
             settlementAllPrice: regionData.fillFee,
-            terminalPrice: regionData.fillFee,
+            terminalPrice: '-',
             terminalAllPrice: regionData.fillFee,
             unit: '元' 
           },{
             id: regionData.id,
             productName: '施工远程费',
-            settlementPrice: regionData.constructionFee,
+            settlementPrice: '-',
             settlementAllPrice: regionData.constructionFee,
-            terminalPrice: regionData.constructionFee,
+            terminalPrice: '-',
             terminalAllPrice: regionData.constructionFee,
             unit: '元' 
           });
         }
         //添加跨层费用
-        if(this.calcuForm.crossLayer == '2'){
+        if(this.calcuForm.crossLayer == '1'){
           this.summaryData.push({
             id: 'kc',
             productName: '跨层费',
@@ -536,8 +536,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* 针对手机（宽度小于 768px） */
+@media (max-width: 767px) {
+  .calculator-index {
+    width: 80%;
+  }
+}
+@media (min-width: 768px) {
+  .calculator-index {
+    width: 50%;
+  }
+}
 .calculator-index{
-  width: 50%;
   margin: 0 auto;
   box-shadow: 0 3px 15px rgba(0,0,0,0.1);
   border-radius: 10px;
@@ -545,13 +555,17 @@ export default {
   font-size: 16px;
   .logo {
     width: 80px;
+    height: 55px;
     float: left;
   }
   .calcu-form {
     margin-top: 40px;
+    ::v-deep .el-form-item .el-form-item__label {
+      width: 100px !important;
+    }
   }
   .calcu-form .form-item {
-    width: 85%;
+    width: 60%;
   }
   .submit-button {
     margin-bottom: 40px;
@@ -559,5 +573,9 @@ export default {
     width: 30%;
   }
 }
-
+.select-option-right {
+  float: right; 
+  color: #8492a6; 
+  font-size: 13px;
+}
 </style>
