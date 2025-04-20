@@ -68,6 +68,7 @@
       <div class="summary-table" v-if="showSummary">
         <div class="optimize-title">基础项目</div>
         <el-table
+          ref="basicTable"
           :data="summaryData"
           :props="summaryColumns"
           border
@@ -92,6 +93,7 @@
       <div class="optimize-table" v-if="showOtherTable">
         <div class="optimize-title">系统优化项目</div>
         <el-table
+          ref="optimizeTable"
           :data="optimizeData"
           :props="optimizeColumns"
           border
@@ -164,11 +166,15 @@
       </div>
       <el-button @click="showOther()" class="other-button">选择系统优化项目</el-button>
       <el-button type="primary" @click="onSubmit()" class="submit-button">{{ chooseShow ? '生成结算单':'确定信息' }}</el-button>
+      <el-button type="primary" @click="exportToExcel()" v-if="showSummary">导出excel</el-button>
+    
     </div>
   </div>
 </template>
 
 <script>
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { region, wetData, dryData, wetDefaultData, dryDefaultData, optimizeData } from '@/util/data.js';
 export default {
   name: 'CalculatorIndex',
@@ -260,7 +266,11 @@ export default {
         //优化项目总价
         optimizeTotal: 0,
         //优化项目成本价总价
-        optimizeAdminTotal: 0
+        optimizeAdminTotal: 0,
+        //优化项目单价和
+        optimizePrice: 0,
+        //优化项目成本价单价和
+        optimizeAdminPrice: 0
       }
     },
     methods: {
@@ -395,6 +405,8 @@ export default {
             else if(column.property == 'settlementAllPrice') this.summaryAdminTotal = sums[index]
             else if(column.property == 'suggestedPriceTotal') this.optimizeTotal = sums[index]
             else if(column.property == 'packagePriceTotal') this.optimizeAdminTotal = sums[index]
+            else if(column.property == 'suggestedPrice') this.optimizePrice = sums[index]
+            else if(column.property == 'packagePrice') this.optimizeAdminPrice = sums[index]
 
           } else {
             sums[index] = '--';
@@ -485,7 +497,105 @@ export default {
       deleteRow(row){
         let index = this.optimizeData.findIndex(obj => obj.id === row.id)
         this.optimizeData.splice(index, 1)
-      }
+      },
+      //导出excel
+      async exportToExcel() {
+        try {
+          // 1. 创建新的工作簿
+          const wb = XLSX.utils.book_new();
+          // 2. 处理基础项目表格（普通表格）
+          const basicTable = this.$refs.basicTable.$el;
+
+          const productWs = XLSX.utils.table_to_sheet(basicTable);
+          // 设置列宽（单位：字符宽度）
+          productWs['!cols'] = [
+            { wch: 5 }, 
+            { wch: 30 },  
+            { wch: 20 } 
+          ];
+          XLSX.utils.book_append_sheet(wb, productWs, "基础项目价格");
+          // 3. 处理系统优化表格（含自定义列）
+          if(this.$refs.optimizeTable){
+            const optimizeData = this.optimizeData.map((item,index) => {
+              const basicItem = {
+                '': index+1,
+                '产品名称': item.category,
+                '型号': item.selectedModel? item.models.find(ele => ele.id === item.selectedModel)?.model : '',  // 选择器值
+                '数量': item.quantity,    // 计数器值
+                '单价': item.suggestedPrice,
+                '小计(元)': item.suggestedPriceTotal
+              }
+              if (this.showSettlement) {
+                basicItem['结算价-单价'] = item.packagePrice; 
+                basicItem['结算价-小计(元)'] = item.packagePriceTotal; 
+              }
+              return basicItem
+            });
+            optimizeData.push({
+              '': '合计',
+              '产品名称': '', // 根据你的合计列顺序调整
+              '型号': '',
+              '数量': '', // 数量列的合计值
+              '单价': this.optimizePrice,
+              '小计(元)': this.optimizeTotal
+            });
+            if (this.showSettlement) {
+              optimizeData[optimizeData.length - 1] = {
+                ...optimizeData[optimizeData.length - 1],  // 保留原有属性
+                '结算价-单价': this.optimizeAdminPrice,
+                '结算价-小计(元)': this.optimizeAdminTotal
+              };    
+            }
+            const userWs = XLSX.utils.json_to_sheet(optimizeData);
+            userWs['!cols'] = [
+              { wch: 5 }, 
+              { wch: 35 },  
+              { wch: 35 } 
+            ];
+            XLSX.utils.book_append_sheet(wb, userWs, "系统优化价格");
+          }
+          // 4. 导出Excel文件
+          const wbout = XLSX.write(wb, {
+            bookType: 'xlsx',
+            type: 'array'
+          });
+          
+          saveAs(
+            new Blob([wbout], { type: 'application/octet-stream' }),
+            `价格表_${new Date().toLocaleDateString()}.xlsx`
+          );
+          
+        } catch (error) {
+          console.error('导出失败:', error);
+          this.$message.error('导出失败，请重试');
+        }
+      },
+      // exportToExcel(){
+      //   // 1. 创建一个新的工作簿
+      //   const wb = XLSX.utils.book_new();
+        
+      //   // 2. 处理第一个表格
+      //   const table1 = this.$refs.basicTable.$el;
+      //   const ws1 = XLSX.utils.table_to_sheet(table1);
+      //   XLSX.utils.book_append_sheet(wb, ws1, "基础项目价格");
+        
+      //   // 3. 处理第二个表格
+      //   if(this.$refs.optimizeTable){
+      //     const table2 = this.$refs.optimizeTable.$el;
+      //     const ws2 = XLSX.utils.table_to_sheet(table2);
+      //     XLSX.utils.book_append_sheet(wb, ws2, "系统优化价格");
+      //   }
+      //   // 4. 导出文件
+      //   const wbout = XLSX.write(wb, {
+      //     bookType: 'xlsx',
+      //     type: 'array'
+      //   });
+      
+      //   saveAs(
+      //     new Blob([wbout], { type: 'application/octet-stream' }),
+      //     '价格表.xlsx'
+      //   );
+      // }
     },
 }
 </script>
