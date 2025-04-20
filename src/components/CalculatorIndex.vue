@@ -246,8 +246,8 @@ export default {
         ],
         //系统优化数据--管理员列
         optimizeAdminColumn: [
-          { prop: 'packagePrice', id: 'packagePrice', label: '成本价-单价', width: 100 },
-          { prop: 'packagePriceTotal', id: 'packagePriceTotal', label: '成本价-小计(元)', width: 100 }
+          { prop: 'packagePrice', id: 'packagePrice', label: '结算价-单价', width: 100 },
+          { prop: 'packagePriceTotal', id: 'packagePriceTotal', label: '结算价-小计(元)', width: 100 }
         ],
         //系统优化数据--操作列
         optimizeOperaColumn: [
