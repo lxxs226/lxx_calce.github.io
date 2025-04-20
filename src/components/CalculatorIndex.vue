@@ -66,6 +66,7 @@
       </el-form>
       <!-- 结算表格 -->
       <div class="summary-table" v-if="showSummary">
+        <div class="optimize-title">基础项目</div>
         <el-table
           :data="summaryData"
           :props="summaryColumns"
@@ -89,6 +90,7 @@
       </div>
       <!-- 系统优化表格 -->
       <div class="optimize-table" v-if="showOtherTable">
+        <div class="optimize-title">系统优化项目</div>
         <el-table
           :data="optimizeData"
           :props="optimizeColumns"
@@ -106,44 +108,59 @@
             :key="column.id"
             :prop="column.prop"
             :label="column.label"
+            :width="column.width"
+            :min-width="column.minWidth"
           >
             <template slot-scope="scope">
               <!-- 型号 -->
               <template v-if="scope.column.property == 'model'">
                 <el-select 
-                  v-model="row.selectedModel" 
+                  v-model="scope.row.selectedModel" 
                   placeholder="请选择型号"
-                  @change="handleModelChange(row)"
+                  @change="handleModelChange(scope.row, 1)"
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="item in row.models"
+                    v-for="item in scope.row.models"
                     :key="item.id"
-                    :label="`${item.model} (建议零售价: ¥${item.suggestedPrice})`"
+                    :label="`${item.model} - ¥${item.suggestedPrice}`"
                     :value="item.id"
                   >
                     <span>{{ item.model }}</span>
                     <span class="select-option-right">
-                      建议零售价: ¥{{ item.suggestedPrice }}
+                      ¥{{ item.suggestedPrice }}
                     </span>
                   </el-option>
                 </el-select>
               </template>
               <!-- 数量 -->
               <span v-else-if="scope.column.property === 'quantity'">
-
+                <el-input-number 
+                  v-model="scope.row.quantity"
+                  controls-position="right" 
+                  :min="0" 
+                  class="quantity-num"
+                  @change="handleModelChange(scope.row, 2)"
+                ></el-input-number>
               </span>
-              <!-- 销售价小计 -->
-              <span v-else-if="scope.column.property === 'suggestedPrice'">
-
+              <!-- 操作列 -->
+              <span v-else-if="scope.column.property === 'operate'">
+                <!-- 新增 -->
+                <i class="el-icon-circle-plus-outline operate-icon" @click="addRow(scope.row)" ></i>
+                <!-- 删除 -->
+                <i class="el-icon-remove-outline operate-icon" v-if="!scope.row.isCategoryRow" @click="deleteRow(scope.row)"></i>
               </span>
               <span v-else>
-                {{scope.row}}
                 {{ scope.row[scope.column.property] }}
               </span>
             </template>
           </el-table-column>
         </el-table>
+      </div>
+      <!-- 价格合计 -->
+      <div v-if="showSummary" class="total-price">
+        <div>合计：{{ +summaryTotal + +optimizeTotal }} 元</div>
+        <div v-if="showSettlement">成本价：{{ +summaryAdminTotal + +optimizeAdminTotal }} 元</div>
       </div>
       <el-button @click="showOther()" class="other-button">选择系统优化项目</el-button>
       <el-button type="primary" @click="onSubmit()" class="submit-button">{{ chooseShow ? '生成结算单':'确定信息' }}</el-button>
@@ -219,13 +236,31 @@ export default {
         showOtherTable: false,
         //系统优化数据
         optimizeData: [],
-        optimizeColumns: [
-          { prop: 'category', id: 'category', label: '产品名称', 'min-width': 300 },
-          { prop: 'model', id: 'model', label: '型号', 'min-width': 300 },
-          { prop: 'quantity', id: 'quantity', label: '数量', width: 200 },
-          { prop: 'packagePrice', id: 'packagePrice', label: '单价', width: 200 },
-          { prop: 'suggestedPrice', id: 'suggestedPrice', label: '小计(元)', width: 200 },
-        ]
+        optimizeColumns: [],
+        optimizeDefaultColumns: [
+          { prop: 'category', id: 'category', label: '产品名称', width: 140 },
+          { prop: 'model', id: 'model', label: '型号', width: 260 },
+          { prop: 'quantity', id: 'quantity', label: '数量', width: 110 },
+          { prop: 'suggestedPrice', id: 'suggestedPrice', label: '单价', width: 80 },
+          { prop: 'suggestedPriceTotal', id: 'suggestedPriceTotal', label: '小计(元)', width: 80 },
+        ],
+        //系统优化数据--管理员列
+        optimizeAdminColumn: [
+          { prop: 'packagePrice', id: 'packagePrice', label: '成本价-单价', width: 100 },
+          { prop: 'packagePriceTotal', id: 'packagePriceTotal', label: '成本价-小计(元)', width: 100 }
+        ],
+        //系统优化数据--操作列
+        optimizeOperaColumn: [
+          { prop: 'operate', id: 'operate', label: '操作', width: 80 }
+        ],
+        //基础项目总价
+        summaryTotal: 0,
+        //基础项目成本价总价
+        summaryAdminTotal: 0,
+        //优化项目总价
+        optimizeTotal: 0,
+        //优化项目成本价总价
+        optimizeAdminTotal: 0
       }
     },
     methods: {
@@ -286,7 +321,7 @@ export default {
         this.defaultItems.forEach(item => {
           this.summaryData.push({
             id: item.id,
-            productName: item.productName,
+            productName: item.productName + '(默认)',
             settlementPrice: item.settlementPrice.toFixed(2),
             settlementAllPrice: (item.settlementPrice * this.calcuForm.area).toFixed(2),
             terminalPrice: item.terminalPrice.toFixed(2),
@@ -321,9 +356,9 @@ export default {
             id: 'kc',
             productName: '跨层费',
             settlementPrice: 2.00,
-            settlementAllPrice: 2.00,
+            settlementAllPrice: (2.00* this.calcuForm.area).toFixed(2),
             terminalPrice: 2.00,
-            terminalAllPrice: 2.00,
+            terminalAllPrice: (2.00* this.calcuForm.area).toFixed(2),
             unit: '元/m²' 
           })
         }
@@ -335,15 +370,17 @@ export default {
       //表格合计列
       getTableSummaries(param){
         const { columns, data } = param;
-        console.log(columns, data)
         const sums = [];
         columns.forEach((column, index) => {
           if (index === 0) {
             sums[index] = '总价';
             return;
           }
+          if (column.property == 'quantity') {
+            sums[index] = '--';
+            return;
+          }
           const values = data.map(item => Number(item[column.property]));
-          console.log(values);
           if (!values.every(value => isNaN(value))) {
             sums[index] = values.reduce((prev, curr) => {
               const value = Number(curr);
@@ -353,7 +390,12 @@ export default {
                 return prev;
               }
             }, 0);
-            sums[index] = sums[index].toFixed(2) + ' 元';
+            sums[index] = sums[index].toFixed(2);
+            if(column.property == 'terminalAllPrice') this.summaryTotal = sums[index]
+            else if(column.property == 'settlementAllPrice') this.summaryAdminTotal = sums[index]
+            else if(column.property == 'suggestedPriceTotal') this.optimizeTotal = sums[index]
+            else if(column.property == 'packagePriceTotal') this.optimizeAdminTotal = sums[index]
+
           } else {
             sums[index] = '--';
           }
@@ -366,6 +408,7 @@ export default {
         if (this.showSettlement) {
           this.showSettlement = false;
           this.summaryColumns = this.defaultColumns
+          this.optimizeColumns = [...this.optimizeDefaultColumns, ...this.optimizeOperaColumn]
           return;
         }
         
@@ -388,6 +431,7 @@ export default {
       setAdminColumn() {
         this.showSettlement = true
         this.summaryColumns = [...this.defaultColumns, ...this.adminColumn]
+        this.optimizeColumns = [...this.optimizeDefaultColumns, ...this.optimizeAdminColumn, ...this.optimizeOperaColumn]
       },
       //显示系统优化table
       showOther(){
@@ -395,25 +439,53 @@ export default {
         if(this.showOtherTable) this.getOptimizeTableData()
       },
       getOptimizeTableData(){
-        this.optimizeData = this.optimizeExcelData.map(category => ({
+        this.optimizeData = this.optimizeExcelData.map((category,index) => ({
+          id: index+1,
           category: category.category,
           models: category.items,
           selectedModel: '',
           packagePrice: 0,
           suggestedPrice: 0,
-          quantity: 1,
-          total: 0,
+          quantity: 0,
+          packagePriceTotal: 0,
+          suggestedPriceTotal: 0,
           isCategoryRow: true
         }));
-        console.log(this.optimizeData)
+        this.optimizeColumns =  [...this.optimizeDefaultColumns, ...this.optimizeOperaColumn]
       },
-      handleModelChange(row) {
-        const selectedItem = row.models.find(item => item.model === row.selectedModel);
-        if (selectedItem) {
-          row.packagePrice = selectedItem.packagePrice;
-          row.suggestedPrice = selectedItem.suggestedPrice;
+      handleModelChange(row, type) {
+        //type--1,切换型号；type--2，切换数量
+        if(type == 1){
+          const selectedItem = row.models.find(item => item.id === row.selectedModel);
+          if (selectedItem) {
+            row.packagePrice = selectedItem.packagePrice;
+            row.suggestedPrice = selectedItem.suggestedPrice;
+          }
+        }
+        if (row.quantity>0 && row.selectedModel) {
+          row.packagePriceTotal = row.packagePrice * row.quantity
+          row.suggestedPriceTotal = row.suggestedPrice * row.quantity
         }
       },
+      addRow(row){
+        let index = this.optimizeData.findIndex(obj => obj.id === row.id)
+        let newRow = { 
+          ...row, 
+          id: this.optimizeData.length+1,
+          selectedModel: '',
+          packagePrice: 0,
+          suggestedPrice: 0,
+          quantity: 0,
+          packagePriceTotal: 0,
+          suggestedPriceTotal: 0,
+          isCategoryRow: false 
+        }
+        this.optimizeData.splice(index+1, 0, newRow);
+      },
+      deleteRow(row){
+        let index = this.optimizeData.findIndex(obj => obj.id === row.id)
+        this.optimizeData.splice(index, 1)
+      }
     },
 }
 </script>
@@ -427,7 +499,7 @@ export default {
 }
 @media (min-width: 768px) {
   .calculator-index {
-    width: 50%;
+    width: 65%;
   }
 }
 .calculator-index{
@@ -460,5 +532,27 @@ export default {
   float: right; 
   color: #8492a6; 
   font-size: 13px;
+}
+.optimize-title {
+  font-size: 16px;
+  margin-bottom: 5px;
+  text-align: left;
+  font-weight: 600;
+  margin-left: 10px;
+}
+.quantity-num {
+  width: 100px;
+}
+.operate-icon {
+  font-size: 18px;
+  margin: 0 10px;
+}
+.operate-icon:hover {
+  color: #409EFF;
+}
+.total-price {
+  font-size: 18px;
+  color: red;
+  font-weight: 600;
 }
 </style>

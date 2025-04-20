@@ -12,6 +12,9 @@ export default {
   name: 'App',
   components: {
     CalculatorIndex
+  },
+  mounted(){
+    document.title = "地暖计算器"
   }
 }
 </script>
