@@ -526,13 +526,7 @@ export const dryData = [
         productName: "不锈钢分集水器箱",
         settlementPrice: 4.57,
         terminalPrice: 9.14,
-      },
-      {
-        id: "10028",
-        productName: "地暖环保三件套",
-        settlementPrice: 2.82,
-        terminalPrice: 4.82,
-      },
+      }
     ],
   },
 ];
