@@ -533,6 +533,12 @@ export const dryData = [
 
 //干式铺设默认必带项目
 export const dryDefaultData = [
+   {
+    id: "30007",
+    productName: "地暖环保三件套",
+    settlementPrice: 2.82,
+    terminalPrice: 4.82,
+  },
   {
     id: "30005",
     productName: "主管道25平米",

@@ -65,7 +65,7 @@
         </div>
       </el-form>
       <!-- 结算表格 -->
-      <div class="summary-table" v-if="showSummary">
+      <div class="summary-table" v-if="showSummary && chooseShow">
         <div class="optimize-title">基础项目</div>
         <el-table
           ref="basicTable"
@@ -280,6 +280,7 @@ export default {
           if (valid) {
             if(!this.chooseShow){
               this.chooseShow = true
+              this.summaryData = []
               this.handleConstructionTypeChange(this.calcuForm.method)
             }else{
               this.generateSummary()
@@ -294,12 +295,11 @@ export default {
       handleConstructionTypeChange(type) {
         // 根据铺设方式过滤品类
         this.filteredCategories = this.excelData[type] || [];
-        
         // 初始化表单字段
         this.filteredCategories.forEach(category => {
           this.$set(this.calcuForm, category.field, null);
         });
-
+        this.showSummary= false
         // 设置默认项目
         if (type === 'wet') this.defaultItems = wetDefaultData
         else this.defaultItems = dryDefaultData
@@ -373,7 +373,6 @@ export default {
             unit: '元/m²' 
           })
         }
-        console.log(this.summaryData)
         this.summaryColumns = this.defaultColumns
         this.showSummary = true;
 
