@@ -161,7 +161,7 @@
         </el-table>
       </div>
       <!-- 价格合计 -->
-      <div v-if="showSummary" class="total-price">
+      <div v-if="showSummary && chooseShow" class="total-price">
         <div>合计：{{ +summaryTotal + +optimizeTotal }} 元</div>
         <div v-if="showSettlement">成本价：{{ +summaryAdminTotal + +optimizeAdminTotal }} 元</div>
       </div>
