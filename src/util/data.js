@@ -649,5 +649,6 @@ export const optimizeData = [
   {
     category: "锅炉安装",
     items: [{ id: "40033", model: "锅炉安装", packagePrice: 500, suggestedPrice: 500 }],
+    maxNum: 1
   },
 ];

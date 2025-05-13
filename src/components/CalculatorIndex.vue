@@ -140,7 +140,8 @@
                 <el-input-number 
                   v-model="scope.row.quantity"
                   controls-position="right" 
-                  :min="0" 
+                  :min="0"
+                  :max="scope.row.maxNum ? scope.row.maxNum : 9999999" 
                   class="quantity-num"
                   @change="handleModelChange(scope.row, 2)"
                 ></el-input-number>
@@ -461,7 +462,8 @@ export default {
           quantity: 0,
           packagePriceTotal: 0,
           suggestedPriceTotal: 0,
-          isCategoryRow: true
+          isCategoryRow: true,
+          maxNum: category.maxNum
         }));
         this.optimizeColumns =  [...this.optimizeDefaultColumns, ...this.optimizeOperaColumn]
       },
