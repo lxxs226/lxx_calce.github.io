@@ -585,44 +585,44 @@ export const optimizeData = [
   {
     category: "不锈钢单盘管水箱（顶进顶出)壁挂炉系统专用",
     items: [
-      { id: "40009", model: "150L", packagePrice: 3650, suggestedPrice: 7300 },
-      { id: "40010", model: "200L", packagePrice: 4350, suggestedPrice: 8700 },
+      { id: "40009", model: "150L", packagePrice: 3125, suggestedPrice: 6250 },
+      { id: "40010", model: "200L", packagePrice: 3675, suggestedPrice: 7350 },
     ],
   },
   {
     category: "不锈钢单盘管水箱（侧出口)壁挂炉系统专用",
     items: [
-      { id: "40011", model: "80L", packagePrice: 2750, suggestedPrice: 5500 },
-      { id: "40012", model: "100L", packagePrice: 2950, suggestedPrice: 5900 },
-      { id: "40013", model: "120L", packagePrice: 3150, suggestedPrice: 6300 },
-      { id: "40014", model: "150L", packagePrice: 3550, suggestedPrice: 7100 },
-      { id: "40015", model: "200L", packagePrice: 4150, suggestedPrice: 8300 },
-      { id: "40016", model: "300L", packagePrice: 4950, suggestedPrice: 9900 },
+      { id: "40011", model: "80L", packagePrice: 2425, suggestedPrice: 4850 },
+      { id: "40012", model: "100L", packagePrice: 2575, suggestedPrice: 5150 },
+      { id: "40013", model: "120L", packagePrice: 2775, suggestedPrice: 5550 },
+      { id: "40014", model: "150L", packagePrice: 3075, suggestedPrice: 6150 },
+      { id: "40015", model: "200L", packagePrice: 3525, suggestedPrice: 7050 },
+      { id: "40016", model: "300L", packagePrice: 4125, suggestedPrice: 8250 },
     ],
   },
   {
     category: "缓冲不锈钢方形单胆上进下出",
     items: [
-      { id: "40017", model: "40L", packagePrice: 2000, suggestedPrice: 4000 },
-      { id: "40018", model: "60L", packagePrice: 2200, suggestedPrice: 4400 },
+      { id: "40017", model: "40L", packagePrice: 1653, suggestedPrice: 3306 },
+      { id: "40018", model: "60L", packagePrice: 1787, suggestedPrice: 3574 },
     ],
   },
   {
     category: "缓冲不锈钢水箱侧出口",
     items: [
-      { id: "40019", model: "40L", packagePrice: 1950, suggestedPrice: 3900 },
-      { id: "40020", model: "50L", packagePrice: 2000, suggestedPrice: 4000 },
-      { id: "40021", model: "60L", packagePrice: 2050, suggestedPrice: 4100 },
-      { id: "40022", model: "80L", packagePrice: 2300, suggestedPrice: 4600 },
-      { id: "40023", model: "100L", packagePrice: 2500, suggestedPrice: 5000 },
-      { id: "40024", model: "120L", packagePrice: 2750, suggestedPrice: 5500 },
-			{ id: "40025", model: "200L", packagePrice: 3300, suggestedPrice: 6600 },
-      { id: "40026", model: "300L", packagePrice: 4150, suggestedPrice: 8300 },
+      { id: "40019", model: "40L", packagePrice: 1764, suggestedPrice: 3528 },
+      { id: "40020", model: "50L", packagePrice: 1792, suggestedPrice: 3584 },
+      { id: "40021", model: "60L", packagePrice: 1817, suggestedPrice: 3634 },
+      { id: "40022", model: "80L", packagePrice: 2050, suggestedPrice: 4100 },
+      { id: "40023", model: "100L", packagePrice: 2200, suggestedPrice: 4400 },
+      { id: "40024", model: "120L", packagePrice: 2384, suggestedPrice: 4768 },
+			{ id: "40025", model: "200L", packagePrice: 2825, suggestedPrice: 5650 },
+      { id: "40026", model: "300L", packagePrice: 3542, suggestedPrice: 7084 },
     ],
   },
   {
     category: "缓冲不锈钢水箱侧出口限高",
-    items: [{ id: "40027", model: "150L", packagePrice: 3000, suggestedPrice: 6000 }],
+    items: [{ id: "40027", model: "150L", packagePrice: 2585, suggestedPrice: 5170 }],
   },
   {
     category: "背篓",
@@ -638,7 +638,16 @@ export const optimizeData = [
     ],
   },
   {
+    category: "主管道",
+    items: [
+      { id: "40034", model: "25", packagePrice: 65, suggestedPrice: 130 },
+      { id: "40035", model: "32", packagePrice: 85, suggestedPrice: 170 },
+      { id: "40036", model: "40", packagePrice: 130, suggestedPrice: 260 },
+      { id: "40037", model: "50", packagePrice: 160, suggestedPrice: 320 },
+    ],
+  },
+  {
     category: "锅炉安装",
-    items: [{ id: "40033", model: "锅炉安装", packagePrice: 300, suggestedPrice: 300 }],
+    items: [{ id: "40033", model: "锅炉安装", packagePrice: 500, suggestedPrice: 500 }],
   },
 ];
